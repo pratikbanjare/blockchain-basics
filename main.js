@@ -7,18 +7,30 @@ class Block{
         this.timestamp = timestamp;
         this.data = data;
         this.previosHash = previosHash;
-        this.hash = '';
+        this.hash = this.caculatehash();
+        this.nounce = 0;
     }
 
     // this will calculate hash for the block
     caculatehash() {
-        return SHA256(this.index + this.previosHash + this.timestamp + JSON.stringify(this.data )).toString();
+        return SHA256(this.index + this.previosHash + this.timestamp + JSON.stringify(this.data ) + this.nounce).toString();
+    }
+
+    mineBlock (difficulty) {
+        // make hash of block begin with certain amount of zero
+        while (this.hash.substring(0, difficulty) !== Array(difficulty+1).join("0")){
+            this.nounce++;
+            this.hash = this.caculatehash();
+            
+        }
+        console.log("Block mined : "+ this.hash);
     }
 }
 
 class BlockChain {
     constructor() {
         this.chain = [this.createGenesisBlock()];
+        this.difficulty = 10;
         
     }
 
@@ -32,7 +44,7 @@ class BlockChain {
 
     addBlock(newBlock) {
         newBlock.previosHash = this.getLatestBlock().hash;
-        newBlock.hash = newBlock.caculatehash();
+        newBlock.hash = newBlock.mineBlock(this.difficulty);
         this.chain.push(newBlock);
     }
 
@@ -54,14 +66,19 @@ class BlockChain {
 }
 
 let pratikCoin  = new BlockChain();
+
+console.log("mining block 1....");
 pratikCoin.addBlock (new Block(1, "20211126", {amount: 4}) );
+console.log("mining block 2....");
 pratikCoin.addBlock (new Block(1, "20211127", {amount: 2}) );
 
-console.log(JSON.stringify(pratikCoin, null, 3));
 
-console.log('is chain valid ? ' + pratikCoin.isChainValid());
 
-pratikCoin.chain[1].data = {amount: 100}
-pratikCoin.chain[1].hash =  pratikCoin.chain[1].caculatehash();
+// console.log(JSON.stringify(pratikCoin, null, 3));
 
-console.log('is chain valid ? ' + pratikCoin.isChainValid());
+// console.log('is chain valid ? ' + pratikCoin.isChainValid());
+
+// pratikCoin.chain[1].data = {amount: 100}
+// pratikCoin.chain[1].hash =  pratikCoin.chain[1].caculatehash();
+
+// console.log('is chain valid ? ' + pratikCoin.isChainValid());
